@@ -6,5 +6,6 @@ fn main() {
     let arena = WordTree::new(words);
 
     println!("Tree created!");
+    arena.dbg();
     arena.disp();
 }
