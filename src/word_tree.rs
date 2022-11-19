@@ -14,6 +14,7 @@ pub struct Node {
     id: NodeId,
     depth: i32,
     parent: Option<NodeId>,
+    terminal: bool,
 }
 
 impl WordTree {
@@ -41,14 +42,18 @@ impl WordTree {
     ) -> Option<NodeId> {
         // find node by data
         for nodes in &mut self.nodes {
-            if nodes.data == data && nodes.depth == depth - 1 && depth > 0 {
-                println!("{:?} {} {}", nodes.parent, nodes.depth, nodes.data);
+            if nodes.data == data && nodes.depth == depth && depth > 0 {
+                println!(
+                    "Found matching node: {:?} {} {}",
+                    nodes.parent, nodes.depth, nodes.data
+                );
                 let temp = match nodes.parent {
                     Some(_) => nodes.parent.unwrap(),
                     None => {
                         return None;
                     }
                 };
+                println!("Found a candidate node");
                 if temp == *parent {
                     return Some(nodes.id);
                 };
@@ -57,15 +62,22 @@ impl WordTree {
         return None;
     }
 
-    pub fn add_node(&mut self, data: char, depth: i32, parent: Option<NodeId>) -> usize {
+    pub fn add_node(
+        &mut self,
+        data: char,
+        depth: i32,
+        parent: Option<NodeId>,
+        terminal: bool,
+    ) -> usize {
         let index = self.nodes.len();
-        let node_id = NodeId { id: index };
+        let id = NodeId { id: index };
 
         let node = Node {
-            data: data,
-            id: node_id,
-            depth: depth,
-            parent: parent,
+            data,
+            id,
+            depth,
+            parent,
+            terminal,
         };
 
         self.nodes.push(node);
@@ -80,6 +92,11 @@ impl WordTree {
             };
         }
         return None;
+    }
+
+    pub fn make_terminal(&mut self, node_id: NodeId) {
+        let node = &mut self.nodes[node_id.id];
+        node.terminal = true;
     }
 
     pub fn get_children(&self, id: usize) -> Vec<NodeId> {
@@ -118,21 +135,39 @@ impl WordTree {
         let kids = self.get_children(node.id);
         if kids.len() > 0 {
             for child in kids {
-                println!(
-                    "{}|-{}",
-                    "|".repeat((level - 1).try_into().unwrap()),
+                // println!("{:?}", self.get_node(child.id).unwrap());
+                print!(
+                    "{}{}",
+                    "|".repeat((level).try_into().unwrap()),
                     self.get_node(child.id).unwrap().data
                 );
-                self.print_children(child, level + 1)
+                if self.get_node(child.id).unwrap().terminal {
+                    println!("*");
+                } else {
+                    println!("");
+                }
+                self.print_children(child, level + 1);
             }
         }
     }
 
     pub fn disp(&self) {
+        {
+            for node in &self.nodes {
+                println!("{:?}", node);
+            }
+        }
+
         let root_nodes = self.nodes_at_depth(0);
 
         for node in root_nodes {
-            println!("{}", self.get_node(node.id).unwrap().data);
+            // println!("{:?}", self.get_node(node.id).unwrap());
+            if self.get_node(node.id).unwrap().terminal {
+                println!("{}*", self.get_node(node.id).unwrap().data);
+            } else {
+                println!("{}", self.get_node(node.id).unwrap().data);
+            }
+
             let level: i32 = 1;
             self.print_children(node, level);
         }
@@ -148,33 +183,38 @@ impl WordTree {
             println!("First letter {}", ltr);
             // first node
             let first_node = match self.find_node(0, ltr) {
-                Some(node_id) => node_id.id,
+                Some(node_id) => {
+                    println!("Re-use a node");
+                    node_id.id
+                }
                 None => {
-                    let new_node = self.add_node(ltr, 0, None);
+                    println!("Create a new node");
+                    let new_node = self.add_node(ltr, 0, None, false);
                     self.get_node(new_node).unwrap().id.id
                 }
             };
             println!("Just created {}", first_node);
-            println!("Now the arena looks like: {:?}", self);
+            // println!("Now the arena looks like: {:?}", self);
             // thereafter...
-            let mut prev_node = self.get_node(first_node).unwrap().id;
+            let mut prev_node_id: NodeId = self.get_node(first_node).unwrap().id;
 
             for (idx, ltr) in word_iterator.enumerate() {
                 println!("next letter {} at depth {}", ltr, idx as i32 + 1);
-                let next_node = match self.find_node_parent(
-                    idx as i32,
-                    self.get_node(prev_node.id).unwrap().data,
-                    &mut prev_node,
-                ) {
+                let next_node = match self.find_node_parent(idx as i32 + 1, ltr, &mut prev_node_id)
+                {
                     Some(node_id) => node_id.id,
-                    None => self.add_node(ltr, idx as i32 + 1, Some(prev_node)),
+                    None => self.add_node(ltr, idx as i32 + 1, Some(prev_node_id), false),
                 };
                 println!("Just created {}", next_node);
-                println!("Now the arena looks like: {:?}", self);
+                // println!("Now the arena looks like: {:?}", self);
                 println!("Get the NodeId {:?}", self.get_node(next_node));
-                prev_node = self.get_node(next_node).unwrap().id;
+                prev_node_id = self.get_node(next_node).unwrap().id
             }
-            println!("Done that one");
+            println!("Finished word, set last node to terminal");
+            let prev_node = self.get_node(prev_node_id.id).unwrap();
+            println!("{:?}", prev_node);
+            self.make_terminal(prev_node.id);
+            println!("{:?}", prev_node);
         }
     }
 }

@@ -1,10 +1,10 @@
 mod word_tree;
-
 use crate::word_tree::WordTree;
-// pub mod word_tree;
+
 fn main() {
-    let words = vec!["abc", "acc", "abb", "bad"];
+    let words = vec!["abc", "acc", "abb", "bad", "a", "dab"];
     let arena = WordTree::new(words);
 
+    println!("Tree created!");
     arena.disp();
 }
