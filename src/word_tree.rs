@@ -26,7 +26,7 @@ impl WordTree {
         return arena;
     }
 
-    pub fn find_node(&mut self, depth: i32, data: char) -> Option<NodeId> {
+    fn find_node(&mut self, depth: i32, data: char) -> Option<NodeId> {
         // find node by data
         for nodes in &mut self.nodes {
             if nodes.data == data && nodes.depth == depth {
@@ -36,12 +36,7 @@ impl WordTree {
         return None;
     }
 
-    pub fn find_node_parent(
-        &mut self,
-        depth: i32,
-        data: char,
-        parent: &mut NodeId,
-    ) -> Option<NodeId> {
+    fn find_node_parent(&mut self, depth: i32, data: char, parent: &mut NodeId) -> Option<NodeId> {
         // find node by data
         for nodes in &mut self.nodes {
             if nodes.data == data && nodes.depth == depth && depth > 0 {
@@ -64,7 +59,7 @@ impl WordTree {
         return None;
     }
 
-    pub fn add_node(
+    fn add_node(
         &mut self,
         data: char,
         depth: i32,
@@ -96,12 +91,12 @@ impl WordTree {
         return None;
     }
 
-    pub fn make_terminal(&mut self, node_id: NodeId) {
+    fn make_terminal(&mut self, node_id: NodeId) {
         let node = &mut self.nodes[node_id.id];
         node.terminal = true;
     }
 
-    pub fn get_children(&self, id: usize) -> Vec<NodeId> {
+    fn get_children(&self, id: usize) -> Vec<NodeId> {
         let mut children: Vec<NodeId> = vec![];
         for node in &self.nodes {
             if node.depth > 0 {
@@ -113,7 +108,7 @@ impl WordTree {
         return children;
     }
 
-    pub fn nodes_at_depth(&self, depth: i32) -> Vec<NodeId> {
+    fn nodes_at_depth(&self, depth: i32) -> Vec<NodeId> {
         let mut nodes: Vec<NodeId> = vec![];
         for node in &self.nodes {
             if node.depth == depth {
@@ -123,7 +118,7 @@ impl WordTree {
         return nodes;
     }
 
-    pub fn max_depth(&self) -> i32 {
+    fn max_depth(&self) -> i32 {
         let mut max_depth = 0;
         for node in &self.nodes {
             if node.depth > max_depth {
@@ -133,7 +128,7 @@ impl WordTree {
         return max_depth;
     }
 
-    pub fn print_children(&self, node: NodeId, level: i32) {
+    fn print_children(&self, node: NodeId, level: i32) {
         let kids = self.get_children(node.id);
         if kids.len() > 0 {
             for child in kids {
@@ -175,7 +170,7 @@ impl WordTree {
         }
     }
 
-    pub fn build_word_tree(&mut self, words: Vec<&str>) {
+    fn build_word_tree(&mut self, words: Vec<&str>) {
         for word in words {
             // println!("{}", word);
 
@@ -218,5 +213,24 @@ impl WordTree {
             self.make_terminal(prev_node.id);
             // println!("{:?}", prev_node);
         }
+    }
+
+    pub fn word_search(&self, pattern: String) -> Vec<String> {
+        let mut search_tree = self.clone();
+        let mut output_list: Vec<String> = vec![];
+        let pt = pattern.clone();
+        for (idx, char) in pt.chars().enumerate() {
+            if char == '.' {
+                continue;
+            } else {
+                for node in search_tree.find_node(idx as i32, char) {
+                    if node.data != char {
+                        search_tree.nodes.remove()
+                    }
+                }
+            }
+        }
+        output_list.push(pt);
+        return output_list;
     }
 }

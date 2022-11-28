@@ -1,7 +1,6 @@
 mod anagram;
-mod word_tree;
-use crate::word_tree::WordTree;
 use bincode;
+mod word_tree;
 use std::fs;
 use std::io::Write;
 
@@ -14,7 +13,7 @@ fn main() {
         let contents = fs::read_to_string(words_file).expect("");
         let words = contents.lines().collect::<Vec<&str>>();
 
-        let arena = WordTree::new(words);
+        let arena = word_tree::WordTree::new(words);
         let encoded = bincode::serialize(&arena).unwrap();
 
         let mut file = fs::File::create(word_tree_file).unwrap();
@@ -22,8 +21,11 @@ fn main() {
     }
 
     let from_file = fs::read(word_tree_file).expect("");
-    let arena: WordTree = bincode::deserialize(&from_file[..]).unwrap();
+    let arena: word_tree::WordTree = bincode::deserialize(&from_file[..]).unwrap();
     println!("Tree created!");
+
+    let full_word = arena.word_search("c.b".to_string());
+    println!("{}", full_word[0]);
     // arena.dbg();
     // arena.disp();
 
