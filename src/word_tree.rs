@@ -26,14 +26,15 @@ impl WordTree {
         return arena;
     }
 
-    fn find_node(&mut self, depth: i32, data: char) -> Option<NodeId> {
+    pub fn find_node(&mut self, depth: i32, data: char) -> Vec<NodeId> {
         // find node by data
+        let mut matching_nodes: Vec<NodeId> = vec![];
         for nodes in &mut self.nodes {
             if nodes.data == data && nodes.depth == depth {
-                return Some(nodes.id);
+                matching_nodes.push(nodes.id);
             };
         }
-        return None;
+        return matching_nodes;
     }
 
     fn find_node_parent(&mut self, depth: i32, data: char, parent: &mut NodeId) -> Option<NodeId> {
@@ -82,7 +83,7 @@ impl WordTree {
         return index;
     }
 
-    fn get_node(&self, id: usize) -> Option<Node> {
+    pub fn get_node(&self, id: usize) -> Option<Node> {
         for node in &self.nodes {
             if node.id.id == id {
                 return Some(node.to_owned());
@@ -106,6 +107,15 @@ impl WordTree {
             }
         }
         return children;
+    }
+
+    pub fn remove_node(&mut self, id: usize) {
+        let children = self.get_children(self.get_node(id).unwrap().id.id);
+        let node_idx = self.nodes.iter().position(|x| x.id.id == id).unwrap();
+        self.nodes.remove(node_idx);
+        for child in children {
+            self.remove_node(child.id);
+        }
     }
 
     fn nodes_at_depth(&self, depth: i32) -> Vec<NodeId> {
@@ -179,16 +189,15 @@ impl WordTree {
 
             // println!("First letter {}", ltr);
             // first node
-            let first_node = match self.find_node(0, ltr) {
-                Some(node_id) => {
-                    // println!("Re-use a node");
-                    node_id.id
-                }
-                None => {
-                    // println!("Create a new node");
-                    let new_node = self.add_node(ltr, 0, None, false);
-                    self.get_node(new_node).unwrap().id.id
-                }
+            let matched_nodes = self.find_node(0, ltr);
+            
+            let first_node: usize = if matched_nodes.len() != 0 {
+                // println!("Re-use a node");
+                matched_nodes[0].id
+            } else {
+                // println!("Create a new node");
+                let new_node: usize = self.add_node(ltr, 0, None, false);
+                self.get_node(new_node).unwrap().id.id
             };
             // println!("Just created {}", first_node);
             // println!("Now the arena looks like: {:?}", self);
@@ -215,22 +224,4 @@ impl WordTree {
         }
     }
 
-    pub fn word_search(&self, pattern: String) -> Vec<String> {
-        let mut search_tree = self.clone();
-        let mut output_list: Vec<String> = vec![];
-        let pt = pattern.clone();
-        for (idx, char) in pt.chars().enumerate() {
-            if char == '.' {
-                continue;
-            } else {
-                for node in search_tree.find_node(idx as i32, char) {
-                    if node.data != char {
-                        search_tree.nodes.remove()
-                    }
-                }
-            }
-        }
-        output_list.push(pt);
-        return output_list;
-    }
 }
