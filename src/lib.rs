@@ -15,8 +15,8 @@ mod tests {
         use crate::word_tree::WordTree;
         let words = vec!["abc", "acc", "abb", "bad", "a", "dab"];
         let mut arena = WordTree::new(words);
-        let test_node = arena.find_node(0, 'a')[0].id;
-        assert!(arena.nodes[test_node].id.id == 0 as usize);
+        let test_node = arena.find_node(0, 'a')[0];
+        assert!(arena.nodes[test_node].id == 0 as usize);
         let node_ids = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
         let depths = vec![0, 1, 2, 1, 2, 2, 0, 1, 2, 0, 1, 2];
         let data = vec!['a', 'b', 'c', 'c', 'c', 'b', 'b', 'a', 'd', 'd', 'a', 'b'];
@@ -31,7 +31,7 @@ mod tests {
             assert!(node.terminal == terminal[idx]);
             match node.parent {
                 Some(node_id) => {
-                    assert_eq!(node_id.id as i32, parent[idx])
+                    assert_eq!(node_id as i32, parent[idx])
                 }
                 None => {
                     assert!(parent[idx] == -1)
