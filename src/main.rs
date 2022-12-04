@@ -20,9 +20,12 @@ fn word_search(tree: word_tree::WordTree, pattern: String) -> Vec<String> {
 }
 
 fn main() {
-    // let words_file = "src/corncob_lowercase.txt";
-    let words_file = "src/words.txt";
-    let word_tree_file = "tree.hmm";
+    let words_file = "src/corncob_lowercase.txt";
+    let word_tree_file = "corncob_tree.hmm";
+    let anagram_filename = "corncob_map.hmm";
+    // let words_file = "src/words.txt";
+    // let word_tree_file = "words_tree.hmm";
+    // let anagram_filename = "words_map.hmm";
 
     if !std::path::Path::new(word_tree_file).exists() {
         let contents = fs::read_to_string(words_file).expect("");
@@ -38,21 +41,15 @@ fn main() {
     let from_file = fs::read(word_tree_file).expect("");
     let arena: word_tree::WordTree = bincode::deserialize(&from_file[..]).unwrap();
     println!("Tree created!");
-    arena.disp();
-
-    let words = arena.get_words(3);
-    println!("{:?}", words);
-    
-    println!("-------------------------------");
-
-    let full_word = word_search(arena, "b.c".to_string());
-    println!("{:?}", full_word);
-
-
-    // arena.dbg();`
     // arena.disp();
 
-    let anagram_filename = "anagram_map.hmm";
+    // let words = arena.get_words(3);
+    // println!("3 letter words: {:?}", words);
+
+    let pattern = "c.mplic.t.".to_string();
+    let full_word = word_search(arena, pattern);
+    println!("Matched words: {:?}", full_word);
+
     if !std::path::Path::new(anagram_filename).exists() {
         let contents = fs::read_to_string(words_file).expect("");
         let words = contents.lines().collect::<Vec<&str>>();
@@ -67,7 +64,7 @@ fn main() {
     let decoded: std::collections::HashMap<String, String> =
         bincode::deserialize(&from_file[..]).unwrap();
 
-    let anagrist = "abc";//"complciated";
+    let anagrist = "complciated";
     println!(
         "{:?}",
         anagram::solve_anagram(&decoded, anagrist.to_string())
