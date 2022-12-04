@@ -15,9 +15,9 @@ pub struct Node {
 }
 
 impl WordTree {
-    pub fn new(words: Vec<&str>) -> WordTree {
+    pub fn new(words: Vec<&str>, max_length: Option<i32>) -> WordTree {
         let mut arena = WordTree { nodes: Vec::new() };
-        arena.build_word_tree(words);
+        arena.build_word_tree(words, max_length);
         return arena;
     }
 
@@ -204,9 +204,18 @@ impl WordTree {
         return self
     }
 
-    fn build_word_tree(&mut self, words: Vec<&str>) {
+    fn build_word_tree(&mut self, words: Vec<&str>, max_length: Option<i32>) {
         for word in words {
             let mut word_iterator = word.chars();
+            match max_length {
+                Some(length) => {
+                    if word.chars().count() as i32 > length { continue }
+                },
+                None => ()
+            };
+            //if word.chars().count() > max_length {
+            //    continue;
+            //};
             let ltr = word_iterator.next().unwrap();
             let matched_nodes = self.find_node(0, ltr);
             

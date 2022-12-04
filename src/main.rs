@@ -28,7 +28,7 @@ fn main() {
         let contents = fs::read_to_string(words_file).expect("");
         let words = contents.lines().collect::<Vec<&str>>();
 
-        let arena = word_tree::WordTree::new(words);
+        let arena = word_tree::WordTree::new(words, Some(4));
         let encoded = bincode::serialize(&arena).unwrap();
 
         let mut file = fs::File::create(word_tree_file).unwrap();
