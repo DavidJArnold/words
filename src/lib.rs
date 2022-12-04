@@ -6,7 +6,7 @@ mod tests {
     fn it_runs() {
         use crate::word_tree::WordTree;
         let words = vec!["abc", "acc", "abb", "bad", "a", "dab"];
-        WordTree::new(words);
+        WordTree::new(words, None);
         assert!(true);
     }
 
@@ -14,7 +14,7 @@ mod tests {
     fn build_tree() {
         use crate::word_tree::WordTree;
         let words = vec!["abc", "acc", "abb", "bad", "a", "dab"];
-        let mut arena = WordTree::new(words);
+        let mut arena = WordTree::new(words, None);
         let test_node = arena.find_node(0, 'a')[0];
         assert!(arena.nodes[test_node].id == 0 as usize);
         let node_ids = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -44,6 +44,6 @@ mod tests {
     fn empty_tree() {
         use crate::word_tree::WordTree;
         let words = vec![];
-        let mut _arena = WordTree::new(words);
+        let mut _arena = WordTree::new(words, None);
     }
 }
