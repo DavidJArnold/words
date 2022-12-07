@@ -55,13 +55,7 @@ impl WordTree {
         return None;
     }
 
-    fn add_node(
-        &mut self,
-        data: char,
-        depth: i32,
-        parent: Option<usize>,
-        terminal: bool,
-    ) -> usize {
+    fn add_node(&mut self, data: char, depth: i32, parent: Option<usize>, terminal: bool) -> usize {
         let id = self.nodes.len();
 
         let node = Node {
@@ -154,7 +148,7 @@ impl WordTree {
 
     pub fn get_words(&self, length: i32) -> Vec<String> {
         // if length is None, get words of all length, otherwise just words of particular length
-        let node_list = self.nodes_at_depth(length-1);
+        let node_list = self.nodes_at_depth(length - 1);
         let mut words: Vec<String> = vec![];
         for node in node_list {
             let mut current_word: String = String::from("");
@@ -165,21 +159,21 @@ impl WordTree {
                     if idx + 1 < length {
                         current_node = match current_node.parent {
                             Some(node_id) => self.get_node(node_id).unwrap(),
-                            None => break
+                            None => break,
                         };
                     }
                     // current_node = self.get_node(.id).unwrap();
-                };
+                }
             }
             if current_word.len() as i32 == length {
                 words.push(current_word);
             }
-        };
+        }
         let mut rev_words: Vec<String> = vec![];
         for word in &words {
             rev_words.push(word.chars().rev().collect::<String>());
-        };
-        return rev_words
+        }
+        return rev_words;
     }
 
     pub fn dbg(&self) {
@@ -201,7 +195,7 @@ impl WordTree {
             let level: i32 = 1;
             self.print_children(node, level);
         }
-        return self
+        return self;
     }
 
     fn build_word_tree(&mut self, words: Vec<&str>, max_length: Option<i32>) {
@@ -209,16 +203,18 @@ impl WordTree {
             let mut word_iterator = word.chars();
             match max_length {
                 Some(length) => {
-                    if word.chars().count() as i32 > length { continue }
-                },
-                None => ()
+                    if word.chars().count() as i32 > length {
+                        continue;
+                    }
+                }
+                None => (),
             };
             //if word.chars().count() > max_length {
             //    continue;
             //};
             let ltr = word_iterator.next().unwrap();
             let matched_nodes = self.find_node(0, ltr);
-            
+
             let first_node: usize = if matched_nodes.len() != 0 {
                 matched_nodes[0]
             } else {
@@ -240,4 +236,18 @@ impl WordTree {
         }
     }
 
+    pub fn word_search(&mut self, pattern: String) -> Vec<String> {
+        let mut search_tree = self.clone();
+        for (idx, char) in pattern.chars().enumerate() {
+            if char != '.' {
+                for node in search_tree.nodes_at_depth(idx as i32) {
+                    if search_tree.get_node(node).unwrap().data != char {
+                        search_tree.remove_node(node);
+                    }
+                }
+            }
+        }
+        let words = search_tree.get_words(pattern.len() as i32);
+        return words;
+    }
 }
